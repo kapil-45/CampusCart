@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    font-family: "Manrope", system-ui, sans-serif;
+    background: #0a0c10;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 162, 39, 0.08), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(52, 211, 153, 0.05), transparent);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: rgba(201, 162, 39, 0.35);
+    color: #f5f3ee;
+  }
+  /* Visible keyboard focus, kept subtle but real */
+  :focus-visible {
+    outline: 2px solid #c9a227;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* Base frosted-glass surface used throughout */
+  .glass {
+    background: rgba(255, 255, 255, 0.035);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(245, 243, 238, 0.09);
+  }
+
+  /* The signature element: a laminated "campus ID card" treatment,
+     used for the auth panel and product cards alike — ties the visual
+     language to the idea of a verified, trusted campus identity. */
+  .id-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .id-card::before {
+    /* top hairline "lamination edge" in gold */
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #c9a227 20%, #e4c25a 50%, #c9a227 80%, transparent);
+    opacity: 0.85;
+  }
+  .id-card::after {
+    /* faint diagonal holographic sheen, animated in on hover via .sheen-hover */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(228, 194, 90, 0.08) 45%,
+      rgba(52, 211, 153, 0.06) 50%,
+      transparent 65%
+    );
+    background-size: 250% 100%;
+    background-position: -150% 0;
+    pointer-events: none;
+  }
+  .id-card.sheen-hover:hover::after {
+    animation: sheen 1.4s ease forwards;
+  }
+
+  .chip {
+    @apply px-3.5 py-1.5 rounded-full text-sm font-medium border border-hairline text-mist transition-colors duration-200;
+  }
+  .chip[data-active="true"] {
+    @apply bg-gold/10 border-gold/40 text-gold-bright;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gold text-ink font-semibold px-5 py-3 transition-all duration-200 hover:bg-gold-bright hover:shadow-goldGlow active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-hairline text-paper font-medium px-5 py-3 transition-all duration-200 hover:bg-white/5 active:scale-[0.98];
+  }
+
+  .field-label {
+    @apply block text-xs font-semibold uppercase tracking-[0.14em] text-mist mb-2;
+  }
+  .field-input {
+    @apply w-full rounded-lg bg-black/25 border border-hairline px-4 py-3 text-paper placeholder:text-mist/60 outline-none transition-colors duration-150 focus:border-gold/60;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
