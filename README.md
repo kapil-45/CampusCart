@@ -15,7 +15,7 @@ CampusCart is a full-stack campus marketplace platform allowing students to buy 
 ### Backend
 - **Python / Django REST Framework**
 - **Authentication & Token Management**
-- **PostgreSQL / SQLite / MongoDB**
+- **MongoDB**
 
 ---
 
