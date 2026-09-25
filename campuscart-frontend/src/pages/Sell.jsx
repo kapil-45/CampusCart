@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 import FormField from '../components/FormField'
+import {
+  uploadImageToCloudinary,
+  createLocalPreview,
+  isCloudinaryConfigured,
+  CLOUDINARY_CLOUD_NAME,
+} from '../api/cloudinary'
 
 const CONDITIONS = [
   { value: 'NEW', label: 'New' },
@@ -38,6 +44,7 @@ export default function Sell() {
   const isEdit = Boolean(id)
   const { user } = useAuth()
   const navigate = useNavigate()
+  const fileInputRef = useRef(null)
 
   const [form, setForm] = useState({
     title: '',
@@ -53,6 +60,14 @@ export default function Sell() {
   const [loading, setLoading] = useState(false)
   const [fetchingProduct, setFetchingProduct] = useState(isEdit)
   const [unauthorized, setUnauthorized] = useState(false)
+
+  // Uploading state
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadError, setUploadError] = useState('')
+  const [isDragging, setIsDragging] = useState(false)
+  const [showConfigModal, setShowConfigModal] = useState(false)
+  const [showUrlInput, setShowUrlInput] = useState(false)
 
   useEffect(() => {
     if (isEdit) {
@@ -88,7 +103,56 @@ export default function Sell() {
     setForm((f) => ({ ...f, [field]: value }))
   }
 
-  function addImage() {
+  async function handleFiles(files) {
+    if (!files || files.length === 0) return
+    setUploadError('')
+    setUploading(true)
+    setUploadProgress(10)
+
+    const fileList = Array.from(files).filter((f) => f.type.startsWith('image/'))
+    if (fileList.length === 0) {
+      setUploadError('Please select valid image files (JPG, PNG, WebP).')
+      setUploading(false)
+      return
+    }
+
+    try {
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i]
+        if (isCloudinaryConfigured) {
+          // Real Cloudinary upload
+          const uploadedUrl = await uploadImageToCloudinary(file, (percent) => {
+            const overall = Math.round(((i + percent / 100) / fileList.length) * 100)
+            setUploadProgress(overall)
+          })
+          setImages((prev) => [...prev, uploadedUrl])
+        } else {
+          // Local base64 data preview fallback when Cloudinary is not configured yet
+          const dataUrl = await createLocalPreview(file)
+          setImages((prev) => [...prev, dataUrl])
+          setUploadProgress(Math.round(((i + 1) / fileList.length) * 100))
+        }
+      }
+    } catch (err) {
+      setUploadError(err.message || 'Image upload failed. Try adding via direct URL or configure Cloudinary.')
+    } finally {
+      setUploading(false)
+      setUploadProgress(0)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  function handleDrop(e) {
+    e.preventDefault()
+    setIsDragging(false)
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFiles(e.dataTransfer.files)
+    }
+  }
+
+  function addImageUrl() {
     const url = imageUrl.trim()
     if (!url) return
     if (images.includes(url)) {
@@ -277,71 +341,143 @@ export default function Sell() {
                 </div>
               </div>
 
-              <div>
+              {/* Enhanced Photos Section with Cloudinary Drag & Drop */}
+              <div className="pt-2">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="field-label !mb-0">Photos (optional)</label>
+                  <div className="flex items-center gap-2">
+                    <label className="field-label !mb-0">Product Photos</label>
+                    {isCloudinaryConfigured ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Cloudinary Active ({CLOUDINARY_CLOUD_NAME})
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowConfigModal(true)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-gold/10 text-gold-bright border border-gold/20 hover:bg-gold/20 transition-colors"
+                      >
+                        ℹ Setup Cloudinary
+                      </button>
+                    )}
+                  </div>
                   {images.length > 0 && (
                     <span className="text-xs text-mist font-mono">{images.length} added</span>
                   )}
                 </div>
-                <p className="text-xs text-mist mb-2.5">
-                  Paste direct image URLs. You can preview them live before publishing.
+                <p className="text-xs text-mist mb-3">
+                  Upload photos of the item so buyers can inspect the condition.
                 </p>
 
-                <div className="flex gap-2">
-                  <input
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        addImage()
-                      }
-                    }}
-                    placeholder="https://images.unsplash.com/..."
-                    className="field-input flex-1"
-                  />
-                  <button
-                    type="button"
-                    onClick={addImage}
-                    disabled={!imageUrl.trim()}
-                    className="btn-ghost !px-5 shrink-0 disabled:opacity-40"
-                  >
-                    + Add
-                  </button>
+                {/* Drag and Drop Zone */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={(e) => handleFiles(e.target.files)}
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                />
+
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setIsDragging(true)
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 ${
+                    isDragging
+                      ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(201,162,39,0.2)]'
+                      : 'border-hairline bg-black/20 hover:border-gold/50 hover:bg-black/40'
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="h-12 w-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold-bright">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-paper">
+                        <span className="text-gold-bright underline">Click to upload photos</span> or drag & drop
+                      </p>
+                      <p className="text-xs text-mist mt-0.5">
+                        Supports JPG, PNG, WebP (multiple files allowed)
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Live typing preview */}
-                {imageUrl.trim() && (
-                  <div className="mt-3 p-3 rounded-xl bg-black/40 border border-hairline flex items-center gap-3 animate-fadeIn">
-                    <div className="h-14 w-14 rounded-lg overflow-hidden bg-black/60 shrink-0 border border-hairline flex items-center justify-center">
-                      <img
-                        src={imageUrl.trim()}
-                        alt="URL Preview"
-                        referrerPolicy="no-referrer"
-                        className="h-full w-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none'
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden')
-                        }}
+                {/* Upload Progress Bar */}
+                {uploading && (
+                  <div className="mt-3 p-3 rounded-xl bg-black/50 border border-gold/30">
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="text-gold-bright flex items-center gap-2">
+                        <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        Uploading photos…
+                      </span>
+                      <span className="font-mono text-mist">{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gold h-full transition-all duration-200"
+                        style={{ width: `${uploadProgress}%` }}
                       />
-                      <span className="hidden text-[10px] text-crimson text-center px-1">Invalid</span>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gold-bright font-medium">Live Preview</p>
-                      <p className="text-xs text-mist truncate">{imageUrl.trim()}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={addImage}
-                      className="btn-primary !py-1.5 !px-3 text-xs shrink-0"
-                    >
-                      Add Photo
-                    </button>
                   </div>
                 )}
 
-                {/* Added images list with live previews */}
+                {/* Upload Error */}
+                {uploadError && (
+                  <p className="mt-2 text-xs text-crimson bg-crimson/10 border border-crimson/20 rounded-lg px-3 py-2">
+                    {uploadError}
+                  </p>
+                )}
+
+                {/* Collapsible Direct URL Option */}
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlInput(!showUrlInput)}
+                    className="text-xs text-mist hover:text-gold-bright flex items-center gap-1 transition-colors"
+                  >
+                    <span>{showUrlInput ? '▾ Hide direct image URL input' : '▸ Or paste direct image URL'}</span>
+                  </button>
+
+                  {showUrlInput && (
+                    <div className="mt-2 flex gap-2 animate-fadeIn">
+                      <input
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            addImageUrl()
+                          }
+                        }}
+                        placeholder="https://images.unsplash.com/..."
+                        className="field-input flex-1 !text-xs !py-2"
+                      />
+                      <button
+                        type="button"
+                        onClick={addImageUrl}
+                        disabled={!imageUrl.trim()}
+                        className="btn-ghost !px-4 !py-2 text-xs shrink-0 disabled:opacity-40"
+                      >
+                        + Add URL
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Added images list with live previews and cover badge */}
                 {images.length > 0 && (
                   <div className="mt-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-mist/80 mb-2">
@@ -351,7 +487,7 @@ export default function Sell() {
                       {images.map((url, i) => (
                         <div
                           key={i}
-                          className="group relative rounded-xl overflow-hidden border border-hairline bg-black/30 aspect-[4/3]"
+                          className="group relative rounded-xl overflow-hidden border border-hairline bg-black/30 aspect-[4/3] transition-all hover:border-gold/40"
                         >
                           <img
                             src={url}
@@ -407,7 +543,7 @@ export default function Sell() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || uploading}
                 className="btn-primary w-full mt-2 disabled:opacity-60"
               >
                 {loading
@@ -418,6 +554,43 @@ export default function Sell() {
           </div>
         )}
       </main>
+
+      {/* Cloudinary Setup Info Modal */}
+      {showConfigModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="id-card glass max-w-md w-full p-6 relative">
+            <h3 className="font-display text-xl text-paper mb-2 flex items-center gap-2">
+              <span className="text-gold-bright">☁️</span> Free Cloudinary Setup
+            </h3>
+            <p className="text-xs text-mist mb-4 leading-relaxed">
+              Enable instant cloud image hosting for your product photos in 2 minutes:
+            </p>
+            <ol className="text-xs text-mist space-y-2 mb-5 list-decimal list-inside bg-black/40 p-3 rounded-xl border border-hairline">
+              <li>Sign up for a free account at <strong className="text-paper">cloudinary.com</strong></li>
+              <li>Go to <strong className="text-paper">Settings → Upload</strong></li>
+              <li>Click <strong className="text-paper">Add Upload Preset</strong></li>
+              <li>Set <em className="text-gold-bright">Signing Mode</em> to <strong className="text-paper">Unsigned</strong> and save.</li>
+              <li>
+                Add both to <code className="text-gold-bright bg-white/5 px-1 py-0.5 rounded font-mono">campuscart-frontend/.env</code>:
+                <div className="mt-1 font-mono text-[11px] text-paper bg-black/60 p-2 rounded border border-hairline">
+                  VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name<br/>
+                  VITE_CLOUDINARY_UPLOAD_PRESET=your_preset_name
+                </div>
+              </li>
+            </ol>
+            <p className="text-[11px] text-mist/80 mb-5">
+              * Note: If not set up yet, images will preview locally and allow full submission for testing!
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowConfigModal(false)}
+              className="btn-primary w-full !py-2 text-sm"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
