@@ -22,6 +22,24 @@ function timeAgo(dateStr) {
   return `${months} month${months > 1 ? 's' : ''} ago`
 }
 
+function parseImages(raw) {
+  if (Array.isArray(raw)) return raw.filter(Boolean)
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed.filter(Boolean)
+    } catch {}
+    const cleaned = raw
+      .replace(/^\[|\]$/g, '')
+      .split(',')
+      .map((s) => s.trim().replace(/^['"]|['"]$/g, ''))
+      .filter(Boolean)
+    if (cleaned.length > 0) return cleaned
+    return [raw.trim()]
+  }
+  return []
+}
+
 export default function ListingDetail() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -31,6 +49,7 @@ export default function ListingDetail() {
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [activeImgIndex, setActiveImgIndex] = useState(0)
   const [imgFailed, setImgFailed] = useState(false)
 
   const [inWishlist, setInWishlist] = useState(false)
@@ -50,6 +69,7 @@ export default function ListingDetail() {
     setLoading(true)
     setNotFound(false)
     setImgFailed(false)
+    setActiveImgIndex(0)
     try {
       const { data } = await api.get(`/api/products/${id}/`)
       setProduct(data)
@@ -107,7 +127,9 @@ export default function ListingDetail() {
   }
 
   const isOwner = user && product && user.id === product.seller?.id
-  const hasImage = product?.images?.length > 0 && !imgFailed
+  const images = parseImages(product?.images)
+  const currentImage = images[activeImgIndex] || images[0]
+  const hasImage = Boolean(currentImage) && !imgFailed
 
   return (
     <div className="min-h-screen">
@@ -142,25 +164,51 @@ export default function ListingDetail() {
 
         {!loading && !notFound && product && (
           <div className="grid md:grid-cols-2 gap-8">
-            {/* image */}
-            <div className="id-card glass aspect-[4/3] overflow-hidden relative">
-              {hasImage ? (
-                <img
-                  src={product.images[0]}
-                  alt={product.title}
-                  onError={() => setImgFailed(true)}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-ink-raised to-black/40">
-                  <span className="font-display text-6xl text-hairline">CC</span>
-                </div>
-              )}
-              {product.status === 'SOLD' && (
-                <div className="absolute inset-0 bg-ink/70 flex items-center justify-center">
-                  <span className="font-display text-2xl text-crimson border-2 border-crimson rounded-lg px-6 py-2 rotate-[-8deg]">
-                    SOLD
-                  </span>
+            {/* images column */}
+            <div className="flex flex-col gap-3">
+              <div className="id-card glass aspect-[4/3] overflow-hidden relative">
+                {hasImage ? (
+                  <img
+                    src={currentImage}
+                    alt={product.title}
+                    referrerPolicy="no-referrer"
+                    onError={() => setImgFailed(true)}
+                    className="h-full w-full object-cover transition-all duration-300"
+                  />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-ink-raised to-black/40">
+                    <span className="font-display text-6xl text-hairline">CC</span>
+                  </div>
+                )}
+                {product.status === 'SOLD' && (
+                  <div className="absolute inset-0 bg-ink/70 flex items-center justify-center">
+                    <span className="font-display text-2xl text-crimson border-2 border-crimson rounded-lg px-6 py-2 rotate-[-8deg]">
+                      SOLD
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Multi-image thumbnail gallery selector */}
+              {images.length > 1 && (
+                <div className="flex gap-2.5 overflow-x-auto pb-1">
+                  {images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setActiveImgIndex(idx)
+                        setImgFailed(false)
+                      }}
+                      className={`h-16 w-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 bg-black/40 ${
+                        activeImgIndex === idx
+                          ? 'border-gold shadow-goldGlow scale-[1.02]'
+                          : 'border-hairline opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={img} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
@@ -216,9 +264,24 @@ export default function ListingDetail() {
               <div className="mt-5 flex flex-col gap-3">
                 {isOwner ? (
                   product.status === 'AVAILABLE' ? (
-                    <button onClick={() => setMarkSoldOpen((v) => !v)} className="btn-primary w-full">
-                      Mark as Sold
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Link
+                        to={`/listing/${product.id}/edit`}
+                        className="btn-ghost flex-1 flex items-center justify-center gap-2"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        Edit Listing
+                      </Link>
+                      <button
+                        onClick={() => setMarkSoldOpen((v) => !v)}
+                        className="btn-primary flex-1"
+                      >
+                        Mark as Sold
+                      </button>
+                    </div>
                   ) : (
                     <div className="text-center text-sm text-mist border border-hairline rounded-xl py-3">
                       This listing has been sold.
@@ -246,7 +309,7 @@ export default function ListingDetail() {
                 ) : null}
 
                 {markSoldOpen && (
-                  <form onSubmit={handleMarkSold} className="id-card glass p-4 flex flex-col gap-3">
+                  <form onSubmit={handleMarkSold} className="id-card glass p-4 flex flex-col gap-3 animate-fadeIn">
                     <label className="field-label !mb-0">Buyer's User ID</label>
                     <p className="text-xs text-mist -mt-2">
                       Ask the buyer for their profile ID (shown after they log in), then enter it here to confirm the sale.

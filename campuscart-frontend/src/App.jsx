@@ -4,7 +4,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ListingDetail from './pages/ListingDetail'
-import ComingSoon from './pages/ComingSoon'
+import Sell from './pages/Sell'
 
 export default function App() {
   return (
@@ -15,7 +15,9 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/listing/:id" element={<ListingDetail />} />
-          <Route path="/sell" element={<ComingSoon title="Create a listing" />} />
+          <Route path="/listing/:id/edit" element={<Sell />} />
+          <Route path="/sell" element={<Sell />} />
+          <Route path="/sell/:id" element={<Sell />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

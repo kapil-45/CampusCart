@@ -3,7 +3,7 @@ import api from '../api/client'
 import Navbar from '../components/Navbar'
 import ProductCard from '../components/ProductCard'
 
-const CATEGORIES = ['All', 'Books', 'Electronics', 'Calculators', 'Bicycles', 'Furniture', 'Other']
+const CATEGORIES = ['All', 'Books', 'Electronics', 'Calculators', 'Bicycles', 'Furniture', 'General', 'Other']
 
 export default function Home() {
   const [products, setProducts] = useState([])

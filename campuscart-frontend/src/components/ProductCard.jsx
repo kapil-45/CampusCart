@@ -18,9 +18,28 @@ function initials(name = '') {
     .toUpperCase()
 }
 
+function parseImages(raw) {
+  if (Array.isArray(raw)) return raw.filter(Boolean)
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed.filter(Boolean)
+    } catch {}
+    const cleaned = raw
+      .replace(/^\[|\]$/g, '')
+      .split(',')
+      .map((s) => s.trim().replace(/^['"]|['"]$/g, ''))
+      .filter(Boolean)
+    if (cleaned.length > 0) return cleaned
+    return [raw.trim()]
+  }
+  return []
+}
+
 export default function ProductCard({ product }) {
   const [imageFailed, setImageFailed] = useState(false)
-  const hasImage = product.images && product.images.length > 0 && !imageFailed
+  const images = parseImages(product.images)
+  const hasImage = images.length > 0 && !imageFailed
 
   return (
     <Link
@@ -31,8 +50,9 @@ export default function ProductCard({ product }) {
       <div className="relative aspect-[4/3] bg-gradient-to-br from-ink-raised to-black/40 overflow-hidden">
         {hasImage ? (
           <img
-            src={product.images[0]}
+            src={images[0]}
             alt={product.title}
+            referrerPolicy="no-referrer"
             onError={() => setImageFailed(true)}
             className="h-full w-full object-cover"
           />

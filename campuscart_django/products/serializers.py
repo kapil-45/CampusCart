@@ -1,5 +1,31 @@
+import ast
+import json
 from rest_framework import serializers
 from .models import Product
+
+
+def normalize_images(imgs):
+    """Normalize images to a clean list of URL strings regardless of Djongo storage format."""
+    if isinstance(imgs, list):
+        return [str(img).strip() for img in imgs if img and str(img).strip()]
+    if isinstance(imgs, str):
+        imgs = imgs.strip()
+        if not imgs:
+            return []
+        try:
+            parsed = json.loads(imgs)
+            if isinstance(parsed, list):
+                return [str(img).strip() for img in parsed if img and str(img).strip()]
+        except Exception:
+            pass
+        try:
+            parsed = ast.literal_eval(imgs)
+            if isinstance(parsed, list):
+                return [str(img).strip() for img in parsed if img and str(img).strip()]
+        except Exception:
+            pass
+        return [imgs]
+    return []
 
 
 class SellerSummarySerializer(serializers.Serializer):
@@ -17,6 +43,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     seller = SellerSummarySerializer(read_only=True)
     seller_phone = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -27,12 +54,10 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'seller', 'seller_phone', 'view_count', 'created_at', 'updated_at', 'sold_at']
 
+    def get_images(self, obj):
+        return normalize_images(obj.images)
+
     def get_seller_phone(self, obj):
-        # Only reveal a seller's phone number to logged-in students, not
-        # to anonymous/public requests — this is what powers the "call
-        # seller" button on the frontend, and it's the one piece of
-        # personal contact info this API exposes at all, so it's gated
-        # behind authentication rather than shown to anyone browsing.
         request = self.context.get('request')
         if request and request.user and request.user.is_authenticated:
             return obj.seller.phone
@@ -46,6 +71,7 @@ class ProductWriteSerializer(serializers.ModelSerializer):
     from request.user in the view, never trusted from client input,
     so nobody can create a listing "as" another student.
     """
+    images = serializers.ListField(child=serializers.CharField(), required=False, default=list)
 
     class Meta:
         model = Product
@@ -61,11 +87,6 @@ class ProductWriteSerializer(serializers.ModelSerializer):
         return value
 
     def validate_status(self, value):
-        # SOLD must only ever be set via POST /api/orders/mark-sold/, which
-        # creates a real Order record alongside it — that's what the
-        # Reviews module relies on to validate who was actually involved
-        # in a transaction. Allowing status=SOLD here would let a seller
-        # bypass that and leave no Order behind.
         if value == 'SOLD':
             raise serializers.ValidationError(
                 'Use POST /api/orders/mark-sold/ to mark a listing as sold '
