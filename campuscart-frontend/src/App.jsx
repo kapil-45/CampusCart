@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ListingDetail from './pages/ListingDetail'
 import Sell from './pages/Sell'
+import Messages from './pages/Messages'
 
 export default function App() {
   return (
@@ -18,8 +19,11 @@ export default function App() {
           <Route path="/listing/:id/edit" element={<Sell />} />
           <Route path="/sell" element={<Sell />} />
           <Route path="/sell/:id" element={<Sell />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/messages/:id" element={<Messages />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
   )
 }
+

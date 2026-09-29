@@ -59,6 +59,7 @@ export default function ListingDetail() {
   const [buyerId, setBuyerId] = useState('')
   const [markSoldError, setMarkSoldError] = useState('')
   const [markSoldBusy, setMarkSoldBusy] = useState(false)
+  const [chatBusy, setChatBusy] = useState(false)
 
   useEffect(() => {
     loadProduct()
@@ -126,7 +127,33 @@ export default function ListingDetail() {
     }
   }
 
-  const isOwner = user && product && user.id === product.seller?.id
+  const isOwner = Boolean(
+    user && product && String(user.id) === String(product.seller?.id)
+  )
+
+  async function handleStartChat(initialMsg = '') {
+    if (!user) return navigate('/login')
+    if (isOwner) {
+      return navigate('/messages')
+    }
+    setChatBusy(true)
+    try {
+      const { data } = await api.post('/api/chat/conversations/', {
+        product_id: product.id,
+        initial_message: initialMsg,
+      })
+      if (data?.id) {
+        navigate(`/messages/${data.id}`)
+      } else {
+        navigate('/messages')
+      }
+    } catch (err) {
+      console.error('Failed to initiate conversation:', err)
+      navigate('/messages')
+    } finally {
+      setChatBusy(false)
+    }
+  }
   const images = parseImages(product?.images)
   const currentImage = images[activeImgIndex] || images[0]
   const hasImage = Boolean(currentImage) && !imgFailed
@@ -264,23 +291,34 @@ export default function ListingDetail() {
               <div className="mt-5 flex flex-col gap-3">
                 {isOwner ? (
                   product.status === 'AVAILABLE' ? (
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex flex-col gap-2.5">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Link
+                          to={`/listing/${product.id}/edit`}
+                          className="btn-ghost flex-1 flex items-center justify-center gap-2"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                          Edit Listing
+                        </Link>
+                        <button
+                          onClick={() => setMarkSoldOpen((v) => !v)}
+                          className="btn-primary flex-1"
+                        >
+                          Mark as Sold
+                        </button>
+                      </div>
                       <Link
-                        to={`/listing/${product.id}/edit`}
-                        className="btn-ghost flex-1 flex items-center justify-center gap-2"
+                        to="/messages"
+                        className="btn-ghost w-full flex items-center justify-center gap-2 text-sm !py-2.5"
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
-                        Edit Listing
+                        View Messages & Buyer Offers
                       </Link>
-                      <button
-                        onClick={() => setMarkSoldOpen((v) => !v)}
-                        className="btn-primary flex-1"
-                      >
-                        Mark as Sold
-                      </button>
                     </div>
                   ) : (
                     <div className="text-center text-sm text-mist border border-hairline rounded-xl py-3">
@@ -289,21 +327,60 @@ export default function ListingDetail() {
                   )
                 ) : product.status === 'AVAILABLE' ? (
                   user ? (
-                    product.seller_phone ? (
-                      <a href={`tel:${product.seller_phone}`} className="btn-primary w-full">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+                    <div className="flex flex-col gap-3">
+                      {/* Primary Chat Action */}
+                      <button
+                        onClick={() => handleStartChat()}
+                        disabled={chatBusy}
+                        className="btn-primary w-full flex items-center justify-center gap-2"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
-                        Call {product.seller?.full_name?.split(' ')[0]} — {product.seller_phone}
-                      </a>
-                    ) : (
-                      <div className="text-center text-sm text-mist border border-hairline rounded-xl py-3">
-                        No phone number on file for this seller.
+                        {chatBusy ? 'Opening Chat…' : `Chat with ${product.seller?.full_name?.split(' ')[0]}`}
+                      </button>
+
+                      {/* Quick inquiry pills */}
+                      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                        <span className="text-mist text-[11px] shrink-0">Quick ask:</span>
+                        <button
+                          onClick={() => handleStartChat('Hi, is this item still available?')}
+                          disabled={chatBusy}
+                          className="chip !py-1 !px-2.5 !text-xs whitespace-nowrap hover:border-gold/50"
+                        >
+                          👋 Still available?
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleStartChat(
+                              `Would you accept ₹${Math.round(
+                                Number(product.asking_price) * 0.9
+                              )} for this?`
+                            )
+                          }
+                          disabled={chatBusy}
+                          className="chip !py-1 !px-2.5 !text-xs whitespace-nowrap hover:border-gold/50"
+                        >
+                          💰 Offer ₹{Math.round(Number(product.asking_price) * 0.9)}
+                        </button>
                       </div>
-                    )
+
+                      {/* Phone call button if present */}
+                      {product.seller_phone && (
+                        <a
+                          href={`tel:${product.seller_phone}`}
+                          className="btn-ghost w-full flex items-center justify-center gap-2 text-sm !py-2.5"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+                          </svg>
+                          Call Seller ({product.seller_phone})
+                        </a>
+                      )}
+                    </div>
                   ) : (
                     <Link to="/login" className="btn-primary w-full">
-                      Log in to contact seller
+                      Log in to chat or contact seller
                     </Link>
                   )
                 ) : null}
