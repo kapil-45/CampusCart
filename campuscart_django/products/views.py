@@ -55,3 +55,14 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.save(update_fields=['view_count'])
         serializer = ProductSerializer(instance)
         return Response(serializer.data)
+
+
+class MyProductListView(generics.ListAPIView):
+    """
+    GET /api/products/my/ -> return all products listed by the authenticated user
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        return Product.objects.filter(seller=self.request.user).order_by('-created_at')

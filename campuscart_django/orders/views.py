@@ -1,5 +1,5 @@
 from django.utils import timezone
-from rest_framework import permissions, status
+from rest_framework import permissions, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -33,3 +33,21 @@ class MarkSoldView(APIView):
         product.save(update_fields=['status', 'sold_at'])
 
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
+
+
+class MyOrdersView(generics.ListAPIView):
+    """
+    GET /api/orders/my/?type=purchases (or ?type=sales)
+    Returns user orders. Defaults to all orders involving user.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        order_type = self.request.query_params.get('type')
+        if order_type == 'purchases':
+            return Order.objects.filter(buyer=user).order_by('-created_at')
+        elif order_type == 'sales':
+            return Order.objects.filter(seller=user).order_by('-created_at')
+        return (Order.objects.filter(buyer=user) | Order.objects.filter(seller=user)).distinct().order_by('-created_at')

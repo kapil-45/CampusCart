@@ -25,12 +25,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Read-only shape of a user, safe to send back in API responses (no password)."""
+    """Read and update shape of a user, safe to send back in API responses (no password)."""
 
     class Meta:
         model = User
         fields = ['id', 'full_name', 'email', 'college_id', 'phone',
-                  'role', 'avg_rating', 'created_at']
+                  'profile_image', 'role', 'avg_rating', 'created_at']
+        read_only_fields = ['id', 'email', 'role', 'avg_rating', 'created_at']
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

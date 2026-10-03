@@ -79,7 +79,11 @@ export default function ListingDetail() {
       }
       if (user) {
         api.get('/api/wishlist/').then((r) => {
-          setInWishlist(r.data.some((item) => item.product.id === data.id))
+          const list = Array.isArray(r.data) ? r.data : r.data?.results || []
+          setInWishlist(list.some((item) => {
+            const pId = typeof item.product === 'object' && item.product !== null ? item.product.id : (item.product || item.product_id)
+            return pId === data.id
+          }))
         }).catch(() => {})
       }
     } catch (err) {

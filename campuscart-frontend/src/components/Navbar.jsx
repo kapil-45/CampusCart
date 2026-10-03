@@ -68,11 +68,31 @@ export default function Navbar({ search, onSearchChange }) {
                   </span>
                 )}
               </Link>
+              <Link
+                to="/profile"
+                className="btn-ghost !px-3 !py-1.5 text-sm flex items-center gap-2 border border-hairline/60 hover:border-gold/50"
+                title="My Profile & Listings"
+              >
+                <div className="w-6 h-6 rounded-full bg-gold/20 border border-gold/40 text-gold flex items-center justify-center font-bold text-xs overflow-hidden">
+                  {user.profileImage ? (
+                    <img src={user.profileImage} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    (user.fullName || user.full_name || 'U').charAt(0).toUpperCase()
+                  )}
+                </div>
+                <span className="hidden sm:inline font-medium text-paper">
+                  {(user.fullName || user.full_name || 'Account').split(' ')[0]}
+                </span>
+              </Link>
               <button onClick={() => navigate('/sell')} className="btn-primary !px-4 !py-2 text-sm">
                 + Sell
               </button>
-              <button onClick={logout} className="btn-ghost !px-4 !py-2 text-sm">
-                Logout
+              <button onClick={logout} className="btn-ghost !px-3 !py-2 text-sm text-mist hover:text-crimson transition-colors" title="Logout">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
               </button>
             </>
           ) : (

@@ -25,6 +25,36 @@ export function AuthProvider({ children }) {
     return data
   }, [])
 
+  const updateUser = useCallback((updatedFields) => {
+    setUser((prev) => {
+      const next = { ...prev, ...updatedFields }
+      localStorage.setItem('cc_user', JSON.stringify(next))
+      return next
+    })
+  }, [])
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      const { data } = await api.get('/api/auth/me/')
+      const updated = {
+        id: data.id,
+        fullName: data.full_name,
+        email: data.email,
+        role: data.role,
+        profileImage: data.profile_image,
+        collegeId: data.college_id,
+        phone: data.phone,
+        avgRating: data.avg_rating,
+      }
+      localStorage.setItem('cc_user', JSON.stringify(updated))
+      setUser(updated)
+      return data
+    } catch (err) {
+      console.error('Failed to fetch profile', err)
+      return null
+    }
+  }, [])
+
   const logout = useCallback(() => {
     localStorage.removeItem('cc_access_token')
     localStorage.removeItem('cc_refresh_token')
@@ -33,7 +63,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateUser, fetchProfile }}>
       {children}
     </AuthContext.Provider>
   )

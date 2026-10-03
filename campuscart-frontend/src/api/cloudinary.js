@@ -15,9 +15,10 @@ export const isCloudinaryConfigured = Boolean(
  * Upload a single File object to Cloudinary via unsigned upload preset
  * @param {File} file
  * @param {(progress: number) => void} [onProgress]
+ * @param {string} [folder='campuscart/products']
  * @returns {Promise<string>} secure_url of uploaded image
  */
-export async function uploadImageToCloudinary(file, onProgress) {
+export async function uploadImageToCloudinary(file, onProgress, folder = 'campuscart/products') {
   if (!isCloudinaryConfigured) {
     throw new Error(
       'Cloudinary is not configured. Please set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET in your .env file.'
@@ -28,7 +29,7 @@ export async function uploadImageToCloudinary(file, onProgress) {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
-  formData.append('folder', 'campuscart/products')
+  formData.append('folder', folder)
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()

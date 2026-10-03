@@ -34,10 +34,18 @@ class LoginView(TokenObtainPairView):
     POST /api/auth/login/
     Body: {"email": "...", "password": "..."}
     Returns: {"access": "<jwt>", "refresh": "<jwt>", "userId": ..., "fullName": ..., "role": ...}
-
-    Note: DRF SimpleJWT already does the "wrong email/password -> generic
-    401" behaviour we hand-wrote in the old LoginServlet, so there's no
-    need to re-implement that check here.
     """
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [permissions.AllowAny]
+
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    """
+    GET   /api/auth/me/  -> get current user profile info
+    PATCH /api/auth/me/  -> update current user profile (full_name, phone, college_id, profile_image)
+    """
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user

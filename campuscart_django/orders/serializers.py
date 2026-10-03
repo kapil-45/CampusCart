@@ -42,8 +42,16 @@ class MarkSoldSerializer(serializers.Serializer):
         return attrs
 
 
+from products.serializers import ProductSerializer
+from accounts.serializers import UserSerializer
+
+
 class OrderSerializer(serializers.ModelSerializer):
+    product_details = ProductSerializer(source='product', read_only=True)
+    buyer_name = serializers.CharField(source='buyer.full_name', read_only=True)
+    seller_name = serializers.CharField(source='seller.full_name', read_only=True)
+
     class Meta:
         model = Order
-        fields = ['id', 'product', 'buyer', 'seller', 'created_at']
+        fields = ['id', 'product', 'product_details', 'buyer', 'buyer_name', 'seller', 'seller_name', 'created_at']
         read_only_fields = fields
