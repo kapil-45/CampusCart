@@ -46,21 +46,17 @@ export default function ListingDetail() {
   const navigate = useNavigate()
 
   const [product, setProduct] = useState(null)
-  const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [activeImgIndex, setActiveImgIndex] = useState(0)
   const [imgFailed, setImgFailed] = useState(false)
-
   const [inWishlist, setInWishlist] = useState(false)
   const [wishlistBusy, setWishlistBusy] = useState(false)
-
   const [markSoldOpen, setMarkSoldOpen] = useState(false)
   const [buyerId, setBuyerId] = useState('')
   const [markSoldError, setMarkSoldError] = useState('')
   const [markSoldBusy, setMarkSoldBusy] = useState(false)
   const [chatBusy, setChatBusy] = useState(false)
-
   useEffect(() => {
     loadProduct()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,9 +70,7 @@ export default function ListingDetail() {
     try {
       const { data } = await api.get(`/api/products/${id}/`)
       setProduct(data)
-      if (data.seller?.id) {
-        api.get(`/api/reviews/user/${data.seller.id}/`).then((r) => setReviews(r.data)).catch(() => {})
-      }
+
       if (user) {
         api.get('/api/wishlist/').then((r) => {
           const list = Array.isArray(r.data) ? r.data : r.data?.results || []
@@ -413,32 +407,7 @@ export default function ListingDetail() {
           </div>
         )}
 
-        {/* reviews */}
-        {!loading && !notFound && product && (
-          <section className="mt-14">
-            <h2 className="font-display text-xl text-paper mb-4">
-              Reviews for {product.seller?.full_name}
-              {reviews.length > 0 && <span className="text-mist font-sans text-sm font-normal"> · {reviews.length}</span>}
-            </h2>
 
-            {reviews.length === 0 ? (
-              <p className="text-mist text-sm">No reviews yet.</p>
-            ) : (
-              <div className="grid sm:grid-cols-2 gap-4">
-                {reviews.map((r) => (
-                  <div key={r.id} className="id-card glass p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-paper font-medium text-sm">{r.reviewer.full_name}</span>
-                      <span className="font-mono text-gold-bright text-sm">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
-                    </div>
-                    {r.comment && <p className="text-mist text-sm mb-2">{r.comment}</p>}
-                    <p className="text-xs text-mist/70">{timeAgo(r.created_at)}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
       </main>
     </div>
   )

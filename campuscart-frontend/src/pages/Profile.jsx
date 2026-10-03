@@ -36,7 +36,7 @@ export default function Profile() {
   const { user, updateUser, fetchProfile, logout } = useAuth()
   const navigate = useNavigate()
 
-  const [activeTab, setActiveTab] = useState('listings') // 'listings' | 'orders' | 'wishlist' | 'reviews'
+  const [activeTab, setActiveTab] = useState('listings') // 'listings' | 'orders' | 'wishlist'
   const [profileData, setProfileData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -47,7 +47,6 @@ export default function Profile() {
   const [orders, setOrders] = useState([])
   const [orderType, setOrderType] = useState('all') // 'all' | 'purchases' | 'sales'
   const [wishlist, setWishlist] = useState([])
-  const [reviews, setReviews] = useState([])
 
   // Modal / Edit state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -105,16 +104,6 @@ export default function Profile() {
         setWishlist(Array.isArray(wishlistData) ? wishlistData : wishlistData.results || [])
       } catch (e) {
         console.warn('Failed to load wishlist', e)
-      }
-
-      // 5. Fetch reviews
-      try {
-        if (userData.id) {
-          const { data: reviewsData } = await api.get(`/api/reviews/user/${userData.id}/`)
-          setReviews(Array.isArray(reviewsData) ? reviewsData : reviewsData.results || [])
-        }
-      } catch (e) {
-        console.warn('Failed to load reviews', e)
       }
     } catch (err) {
       console.error(err)
@@ -344,14 +333,6 @@ export default function Profile() {
                       <span>
                         Member since {profileData?.created_at ? new Date(profileData.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : '2026'}
                       </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1 text-gold">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                        <strong className="text-paper">{profileData?.avg_rating ? Number(profileData.avg_rating).toFixed(1) : 'New'}</strong>
-                        {reviews.length > 0 && <span>({reviews.length} reviews)</span>}
-                      </span>
                     </div>
                   </div>
                 </div>
@@ -451,20 +432,6 @@ export default function Profile() {
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                   </svg>
                   Saved Wishlist ({wishlist.length})
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('reviews')}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
-                    activeTab === 'reviews'
-                      ? 'bg-gold/15 text-gold-bright border border-gold/40 shadow-sm'
-                      : 'text-mist hover:text-paper hover:bg-white/5'
-                  }`}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                  Reviews ({reviews.length})
                 </button>
               </div>
             </div>
@@ -833,38 +800,6 @@ export default function Profile() {
                         </div>
                       )
                     })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* TAB CONTENT: REVIEWS */}
-            {activeTab === 'reviews' && (
-              <div className="space-y-6">
-                {reviews.length === 0 ? (
-                  <div className="glass p-12 rounded-2xl border border-hairline text-center space-y-3">
-                    <p className="text-mist">No student reviews yet.</p>
-                    <p className="text-xs text-mist/70">
-                      Ratings and reviews will show here as you complete purchases and sales with your peers.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {reviews.map((rev) => (
-                      <div key={rev.id} className="glass p-5 rounded-2xl border border-hairline space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-paper text-sm">{rev.reviewer_name || 'Student'}</span>
-                            <span className="text-xs text-mist">• {new Date(rev.created_at).toLocaleDateString()}</span>
-                          </div>
-                          <div className="flex items-center text-gold text-xs font-bold gap-1">
-                            {'★'.repeat(rev.rating)}
-                            <span className="text-mist">({rev.rating}/5)</span>
-                          </div>
-                        </div>
-                        {rev.comment && <p className="text-sm text-paper/90 leading-relaxed">{rev.comment}</p>}
-                      </div>
-                    ))}
                   </div>
                 )}
               </div>

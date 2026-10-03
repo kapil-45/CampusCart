@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'products',
     'wishlist',
     'orders',
-    'reviews',
+
     'chat',
 ]
 
