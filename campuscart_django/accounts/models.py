@@ -42,7 +42,9 @@ class User(AbstractBaseUser):
 
     full_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
-    college_id = models.CharField(max_length=50, blank=True, null=True)
+    campus = models.ForeignKey('campuses.Campus', on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
+    college_id = models.CharField(max_length=50, blank=True, null=True) # Keeping for backward compatibility
+    year = models.CharField(max_length=20, blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     profile_image = models.CharField(max_length=255, blank=True, null=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='STUDENT')

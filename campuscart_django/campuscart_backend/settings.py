@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'orders',
 
     'chat',
+    'campuses',
 ]
 
 MIDDLEWARE = [
