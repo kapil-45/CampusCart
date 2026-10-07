@@ -1,0 +1,89 @@
+{
+  "index_name": "44bea382-c525-4740-8a07-04bd20a99b52",
+  "title": "Directory of Higher Educational Institutions in India",
+  "desc": "Directory of Colleges and Higher Education Institutions",
+  "created": 1581234567,
+  "updated": 1581234567,
+  "created_date": "2020-02-09T00:00:00Z",
+  "updated_date": "2020-02-09T00:00:00Z",
+  "active": "1",
+  "status": "ok",
+  "total": 12,
+  "count": 12,
+  "limit": "50",
+  "offset": "0",
+  "records": [
+    {
+      "college_name": "Veermata Jijabai Technological Institute (VJTI)",
+      "district_name": "Mumbai",
+      "state_name": "Maharashtra",
+      "aicte_id": "1-1001"
+    },
+    {
+      "college_name": "Indian Institute of Technology Bombay (IITB)",
+      "district_name": "Mumbai",
+      "state_name": "Maharashtra",
+      "aicte_id": "1-1002"
+    },
+    {
+      "college_name": "College of Engineering Pune (COEP)",
+      "district_name": "Pune",
+      "state_name": "Maharashtra",
+      "aicte_id": "1-2001"
+    },
+    {
+      "college_name": "Pune Institute of Computer Technology (PICT)",
+      "district_name": "Pune",
+      "state_name": "Maharashtra",
+      "aicte_id": "1-2002"
+    },
+    {
+      "college_name": "Indian Institute of Technology Delhi (IITD)",
+      "district_name": "New Delhi",
+      "state_name": "Delhi",
+      "aicte_id": "1-3001"
+    },
+    {
+      "college_name": "Delhi Technological University (DTU)",
+      "district_name": "Delhi",
+      "state_name": "Delhi",
+      "aicte_id": "1-3002"
+    },
+    {
+      "college_name": "Indian Institute of Science (IISc)",
+      "district_name": "Bengaluru",
+      "state_name": "Karnataka",
+      "aicte_id": "1-4001"
+    },
+    {
+      "college_name": "RV College of Engineering (RVCE)",
+      "district_name": "Bengaluru",
+      "state_name": "Karnataka",
+      "aicte_id": "1-4002"
+    },
+    {
+      "college_name": "International Institute of Information Technology Hyderabad (IIITH)",
+      "district_name": "Hyderabad",
+      "state_name": "Telangana",
+      "aicte_id": "1-5001"
+    },
+    {
+      "college_name": "Indian Institute of Technology Madras (IITM)",
+      "district_name": "Chennai",
+      "state_name": "Tamil Nadu",
+      "aicte_id": "1-6001"
+    },
+    {
+      "college_name": "Jadavpur University",
+      "district_name": "Kolkata",
+      "state_name": "West Bengal",
+      "aicte_id": "1-7001"
+    },
+    {
+      "college_name": "Indian Institute of Technology Kharagpur (IIT KGP)",
+      "district_name": "Kharagpur",
+      "state_name": "West Bengal",
+      "aicte_id": "1-7002"
+    }
+  ]
+}

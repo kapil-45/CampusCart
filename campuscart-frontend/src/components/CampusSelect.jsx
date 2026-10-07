@@ -8,6 +8,8 @@ export default function CampusSelect({ value, onChange, error }) {
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef(null);
 
+  const isOtherSelected = value?.id === 'other';
+
   // Group campuses by city
   const groupedCampuses = campuses.reduce((acc, campus) => {
     const city = campus.city || 'Other';
@@ -49,14 +51,19 @@ export default function CampusSelect({ value, onChange, error }) {
   }, [query, isOpen]);
 
   const handleSelect = (campusId, campusName) => {
-    onChange(campusId, campusName);
-    setQuery(campusName);
+    if (campusId === 'other') {
+      onChange('other', '');
+      setQuery('Other (Not Listed)');
+    } else {
+      onChange(campusId, campusName);
+      setQuery(campusName);
+    }
     setIsOpen(false);
   };
 
   return (
     <div ref={wrapperRef} className="relative">
-      <label className="field-label">Campus <span className="text-crimson">*</span></label>
+      <label className="field-label">Campus / College <span className="text-crimson">*</span></label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg className="h-5 w-5 text-mist/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,12 +82,12 @@ export default function CampusSelect({ value, onChange, error }) {
           onFocus={() => {
             setIsOpen(true);
             if (!query && value?.name) {
-              setQuery(value.name);
+              setQuery(value.id === 'other' ? 'Other (Not Listed)' : value.name);
             }
           }}
         />
       </div>
-      {error && <p className="mt-1.5 text-sm text-crimson">{error}</p>}
+      {!isOtherSelected && error && <p className="mt-1.5 text-sm text-crimson">{error}</p>}
 
       {isOpen && (
         <div className="absolute z-10 mt-1 w-full glass bg-ink/95 rounded-lg shadow-lg max-h-60 overflow-auto border border-hairline p-1">
@@ -111,19 +118,35 @@ export default function CampusSelect({ value, onChange, error }) {
           ) : (
             <div className="p-4 text-center text-sm text-mist">No campuses found</div>
           )}
-          
+
           <div className="border-t border-hairline mt-1 pt-1">
             <p className="px-3 pt-2 text-xs text-mist text-center">Can't find your campus?</p>
             <button
               type="button"
-              onClick={() => handleSelect('other', query || 'Other Campus')}
-              className="w-full text-center px-3 py-2 text-sm text-gold-bright hover:bg-gold/10 rounded-md transition-colors mt-1"
+              onClick={() => handleSelect('other', '')}
+              className="w-full text-center px-3 py-2 text-sm text-gold-bright hover:bg-gold/10 rounded-md transition-colors mt-1 font-medium"
             >
-              Select "Other" to add it
+              + Select "Other" to enter manually
             </button>
           </div>
+        </div>
+      )}
+
+      {isOtherSelected && (
+        <div className="mt-3">
+          <label className="field-label">Specify College / Institution Name <span className="text-crimson">*</span></label>
+          <input
+            type="text"
+            className="field-input"
+            placeholder="Type your official college name..."
+            value={value?.name && value.name !== 'Other (Not Listed)' ? value.name : ''}
+            onChange={(e) => onChange('other', e.target.value)}
+            required
+          />
+          {error && <p className="mt-1.5 text-sm text-crimson">{error}</p>}
         </div>
       )}
     </div>
   );
 }
+

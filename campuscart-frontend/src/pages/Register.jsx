@@ -54,7 +54,11 @@ export default function Register() {
     setErrors({})
 
     if (!form.campus) {
-      setErrors({ campus: 'Please select your campus.' })
+      setErrors({ campus: 'Please select your campus or select "Other".' })
+      return
+    }
+    if (form.campus === 'other' && (!form.campusName || !form.campusName.trim())) {
+      setErrors({ campus: 'Please specify your official college name.' })
       return
     }
     if (!form.year) {

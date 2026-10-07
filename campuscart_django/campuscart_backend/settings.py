@@ -123,3 +123,31 @@ SIMPLE_JWT = {
 
 # ---------------- CORS (allow the React dev server to call this API) ----------------
 CORS_ALLOW_ALL_ORIGINS = True   # fine for local dev; restrict this before any real deployment
+
+# ---------------- Government of India data.gov.in API Configuration ----------------
+import os
+
+def _load_env_key(key_name):
+    val = os.environ.get(key_name)
+    if val:
+        return val
+    env_paths = [
+        BASE_DIR / '.env',
+        BASE_DIR.parent / '.env',
+        BASE_DIR.parent / 'campuscart-frontend' / '.env',
+    ]
+    for path in env_paths:
+        if path.exists():
+            try:
+                with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith(f"{key_name}="):
+                            return line.split('=', 1)[1].strip().strip('"\'')
+            except Exception:
+                pass
+    return ''
+
+DATA_GOV_API_KEY = _load_env_key('DATA_GOV_API_KEY')
+DATA_GOV_RESOURCE_ID = os.environ.get('DATA_GOV_RESOURCE_ID', '44bea382-c525-4740-8a07-04bd20a99b52')
+
