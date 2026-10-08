@@ -60,5 +60,12 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'email'         # log in with email, not a separate username
     REQUIRED_FIELDS = ['full_name']  # asked for when running createsuperuser
 
+    def has_perm(self, perm, obj=None):
+        return self.is_active and self.is_staff
+
+    def has_module_perms(self, app_label):
+        return self.is_active and self.is_staff
+
+
     def __str__(self):
         return f"{self.full_name} ({self.email})"
