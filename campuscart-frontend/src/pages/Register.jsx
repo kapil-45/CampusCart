@@ -9,7 +9,7 @@ import { GoogleLogin } from '@react-oauth/google'
 import api from '../api/client'
 
 export default function Register() {
-  const { register, login } = useAuth()
+  const { register, login, fetchProfile } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({
     email: '',
@@ -23,28 +23,35 @@ export default function Register() {
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
   const [loading, setLoading] = useState(false)
+  // New state for Google‑flow extra info
+  const [showExtraForm, setShowExtraForm] = useState(false)
+  const [extraPhone, setExtraPhone] = useState('')
+  const [extraCampus, setExtraCampus] = useState(null)
+  const [extraCampusName, setExtraCampusName] = useState('')
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }))
   }
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    setFormError('')
-    setLoading(true)
+    setFormError('');
+    setLoading(true);
     try {
       const { data } = await api.post('/api/auth/google/', {
         credential: credentialResponse.credential,
-      })
-      localStorage.setItem('cc_access_token', data.access)
-      localStorage.setItem('cc_refresh_token', data.refresh)
-      const userData = { id: data.userId, fullName: data.fullName, role: data.role }
-      localStorage.setItem('cc_user', JSON.stringify(userData))
-      
-      // Reload or navigate to trigger AuthContext update
-      window.location.href = '/'
+      });
+      localStorage.setItem('cc_access_token', data.access);
+      localStorage.setItem('cc_refresh_token', data.refresh);
+      const userData = { id: data.userId, fullName: data.fullName, role: data.role, email: data.email };
+      localStorage.setItem('cc_user', JSON.stringify(userData));
+      // Prefill email (optional)
+      update('email', data.email || '');
+      // Show modal for extra info collection (phone, campus)
+      setShowExtraForm(true);
+      setLoading(false);
     } catch (err) {
-      setFormError(err.response?.data?.error || 'Google sign-in failed. Please try again.')
-      setLoading(false)
+      setFormError(err.response?.data?.error || 'Google sign-in failed. Please try again.');
+      setLoading(false);
     }
   }
 
@@ -68,6 +75,10 @@ export default function Register() {
     if (!termsAccepted) {
       setFormError('You must agree to the Terms of Service and Privacy Policy.')
       return
+    }
+    if (!form.phone) {
+      setErrors({ ...errors, phone: 'Phone number is required.' });
+      return;
     }
 
     setLoading(true)
@@ -240,6 +251,56 @@ export default function Register() {
                 {loading ? 'Creating account…' : 'Create Account'}
               </button>
             </form>
+
+            {showExtraForm && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-paper rounded-lg shadow-lg p-6 w-full max-w-md">
+                  <h2 className="font-display text-xl mb-4">Complete Your Profile</h2>
+                  <p className="mb-4 text-mist">Please provide your phone number and campus information to finish registration.</p>
+                  <div className="flex flex-col gap-4">
+                    <FormField
+                      label="Phone Number"
+                      required
+                      value={extraPhone}
+                      onChange={(e) => setExtraPhone(e.target.value)}
+                      placeholder="9876543210"
+                      error={errors.phone}
+                    />
+                    <CampusSelect
+                      value={{ id: extraCampus, name: extraCampusName }}
+                      onChange={(id, name) => {
+                        setExtraCampus(id);
+                        setExtraCampusName(name);
+                      }}
+                      error={errors.campus}
+                    />
+                    <button
+                      type="button"
+                      className="btn-primary mt-2"
+                      onClick={async () => {
+                        if (!extraPhone) { setErrors((e) => ({ ...e, phone: 'Phone required' })); return; }
+                        if (!extraCampus && !extraCampusName) { setErrors((e) => ({ ...e, campus: 'Campus required' })); return; }
+                        try {
+                          await api.patch('/api/auth/me/', {
+                            phone: extraPhone,
+                            college_id: extraCampus !== 'other' ? extraCampus : null,
+                            campus: extraCampus === 'other' ? extraCampusName : null,
+                          });
+                          // Hydrate AuthContext so the app recognises the user as logged in
+                          await fetchProfile();
+                          setShowExtraForm(false);
+                          navigate('/');
+                        } catch (e) {
+                          setFormError('Failed to save profile. Please try again.');
+                        }
+                      }}
+                    >
+                      Save and Continue
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <p className="text-sm text-mist mt-6 text-center">
               Already on CampusCart?{' '}
