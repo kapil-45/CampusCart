@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -317,7 +317,7 @@ export default function ListingDetail() {
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
-                <span>Campus{product.seller?.college ? `, ${product.seller.college}` : ''}</span>
+                <span>{product.seller?.college || 'Campus'}</span>
                 {product.created_at && (
                   <>
                     <span className="mx-1 opacity-30">&#8226;</span>
@@ -358,12 +358,15 @@ export default function ListingDetail() {
                       </svg>
                     </div>
                     {product.seller?.avg_rating > 0 ? (
-                      <p className="text-xs text-gold-bright font-mono mt-0.5">&#9733; {product.seller.avg_rating.toFixed(1)}</p>
+                      <p className="text-xs text-gold-bright font-mono mt-0.5">★ {product.seller.avg_rating.toFixed(1)}</p>
                     ) : (
                       <p className="text-xs text-emerald mt-0.5">Verified</p>
                     )}
+                    {product.seller?.college && (
+                      <p className="text-xs text-mist mt-0.5">Campus: {product.seller.college}</p>
+                    )}
+                    </div>
                   </div>
-                </div>
               </div>
 
               <div className="flex flex-col gap-3">

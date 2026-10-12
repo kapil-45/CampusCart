@@ -36,6 +36,32 @@ class SellerSummarySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     full_name = serializers.CharField()
     avg_rating = serializers.FloatField()
+    college = serializers.SerializerMethodField()
+
+    def get_college(self, obj):
+        """Return the seller's campus name.
+        - campus FK set → use its name
+        - college_id is a numeric string → try Campus.objects.get(pk=...)
+        - college_id is a plain string (user typed 'other') → return as-is
+        - nothing set → None
+        """
+        if obj.campus_id:
+            try:
+                return obj.campus.name
+            except Exception:
+                pass
+        if obj.college_id:
+            raw = str(obj.college_id).strip()
+            if raw.isdigit():
+                try:
+                    from campuses.models import Campus
+                    return Campus.objects.get(pk=int(raw)).name
+                except Exception:
+                    pass  # unknown ID, fall through
+            else:
+                # User typed a custom college name (the 'Other' path)
+                return raw
+        return None
 
 
 class ProductSerializer(serializers.ModelSerializer):
