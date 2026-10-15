@@ -1,13 +1,19 @@
-export default function Wordmark({ size = 'md' }) {
-  const textSize = size === 'lg' ? 'text-3xl' : 'text-xl'
+export default function Wordmark({ size = 'md', variant = 'horizontal', className = '' }) {
+  const heightClass =
+    variant === 'stacked'
+      ? size === 'lg' ? 'h-16' : size === 'sm' ? 'h-10' : 'h-12'
+      : size === 'lg' ? 'h-10 sm:h-11' : size === 'sm' ? 'h-7' : 'h-8 sm:h-9'
+
+  const src = variant === 'stacked' ? '/logo-dark.png' : '/logo-horizontal.png'
+
   return (
-    <div className="flex items-center gap-2.5 select-none">
-      <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gold/15 border border-gold/30">
-        <span className="h-2 w-2 rounded-full bg-gold shadow-[0_0_10px_rgba(201,162,39,0.8)]" />
-      </span>
-      <span className={`font-display ${textSize} tracking-tight text-paper`}>
-        Campus<span className="text-gold-bright">Cart</span>
-      </span>
+    <div className={`flex items-center select-none ${className}`}>
+      <img
+        src={src}
+        alt="CampusCart"
+        className={`${heightClass} w-auto object-contain transition-transform duration-200 hover:scale-[1.02]`}
+      />
     </div>
   )
 }
+

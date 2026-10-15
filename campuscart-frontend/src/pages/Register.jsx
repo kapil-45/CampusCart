@@ -94,7 +94,7 @@ export default function Register() {
       }
       await register(payload)
       await login(form.email, form.password)
-      navigate('/')
+      navigate('/home')
     } catch (err) {
       const data = err.response?.data
       if (data && typeof data === 'object' && !data.message) {
@@ -289,7 +289,7 @@ export default function Register() {
                           // Hydrate AuthContext so the app recognises the user as logged in
                           await fetchProfile();
                           setShowExtraForm(false);
-                          navigate('/');
+                          navigate('/home');
                         } catch (e) {
                           setFormError('Failed to save profile. Please try again.');
                         }

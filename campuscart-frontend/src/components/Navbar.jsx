@@ -27,7 +27,7 @@ export default function Navbar({ search, onSearchChange }) {
   return (
     <header className="sticky top-0 z-30 glass border-b border-hairline">
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center gap-6">
-        <Link to="/">
+        <Link to="/home">
           <Wordmark />
         </Link>
 
