@@ -1,27 +1,40 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
         ink: {
-          DEFAULT: "#0A0C10",
-          soft: "#12151C",
-          raised: "#181C25",
+          DEFAULT: "var(--color-ink)",
+          soft: "var(--color-ink-soft)",
+          raised: "var(--color-ink-raised)",
         },
         gold: {
-          DEFAULT: "#C9A227",
-          bright: "#E4C25A",
-          dim: "#8A6F1D",
+          DEFAULT: "#7731E6",
+          bright: "#9D4EDD",
+          dim: "#5A189A",
+        },
+        brand: {
+          DEFAULT: "#7731E6",
+          bright: "#9D4EDD",
+          dim: "#5A189A",
+          light: "#C77DFF",
+        },
+        purple: {
+          DEFAULT: "#7731E6",
+          bright: "#9D4EDD",
+          dim: "#5A189A",
+          light: "#C77DFF",
         },
         emerald: {
           DEFAULT: "#34D399",
           soft: "#1F5C46",
         },
         crimson: "#E4572E",
-        paper: "#F5F3EE",
-        mist: "#A8A6A0",
-        hairline: "rgba(245,243,238,0.09)",
+        paper: "var(--color-paper)",
+        mist: "var(--color-mist)",
+        hairline: "var(--color-hairline)",
       },
       fontFamily: {
         display: ["Fraunces", "serif"],
@@ -32,8 +45,9 @@ export default {
         xs: "2px",
       },
       boxShadow: {
-        glass: "0 8px 32px rgba(0,0,0,0.45)",
-        goldGlow: "0 0 0 1px rgba(201,162,39,0.25), 0 8px 24px rgba(201,162,39,0.08)",
+        glass: "0 8px 32px rgba(0,0,0,0.5)",
+        goldGlow: "0 0 0 1px rgba(119,49,230,0.35), 0 8px 24px rgba(119,49,230,0.22)",
+        purpleGlow: "0 0 0 1px rgba(119,49,230,0.35), 0 8px 24px rgba(119,49,230,0.22)",
       },
       keyframes: {
         drift: {

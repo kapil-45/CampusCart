@@ -436,7 +436,7 @@ export default function Messages() {
                           <div
                             className={`max-w-[82%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-sm transition-all ${
                               isMine
-                                ? 'bg-gradient-to-r from-gold/90 to-gold-bright text-ink font-medium rounded-tr-none'
+                                ? 'bg-gradient-to-r from-gold to-gold-bright text-paper font-medium rounded-tr-none shadow-md'
                                 : 'glass bg-ink-raised/90 text-paper border border-hairline rounded-tl-none'
                             }`}
                           >

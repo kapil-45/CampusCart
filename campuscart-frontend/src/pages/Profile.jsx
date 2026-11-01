@@ -210,7 +210,7 @@ export default function Profile() {
   })
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0c10] text-paper selection:bg-gold/30">
+    <div className="min-h-screen flex flex-col bg-ink text-paper selection:bg-gold/30">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
@@ -275,7 +275,7 @@ export default function Profile() {
                       onClick={() => fileInputRef.current?.click()}
                       disabled={avatarUploading}
                       title="Upload new avatar"
-                      className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-gold text-ink hover:bg-gold-bright transition shadow-md flex items-center justify-center group-hover:scale-105"
+                      className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-gold text-paper hover:bg-gold-bright transition shadow-md flex items-center justify-center group-hover:scale-105"
                     >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />

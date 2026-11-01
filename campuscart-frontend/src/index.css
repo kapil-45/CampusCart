@@ -2,68 +2,108 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══════════════════════════════════════════════════
+   DESIGN TOKENS (LIGHT DEFAULT & DARK THEME)
+══════════════════════════════════════════════════ */
+:root {
+  color-scheme: light;
+  --color-ink: #FFFFFF;
+  --color-ink-soft: #F8F9FD;
+  --color-ink-raised: #FFFFFF;
+  --color-paper: #0F172A;
+  --color-mist: #64748B;
+  --color-hairline: rgba(226, 232, 240, 0.9);
+  --color-glass-bg: rgba(255, 255, 255, 0.9);
+  --color-glass-border: rgba(226, 232, 240, 0.85);
+  --card-bg: #FFFFFF;
+  --card-border: rgba(226, 232, 240, 0.9);
+  --card-shadow: 0 10px 25px -5px rgba(119, 49, 230, 0.06), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+}
+
+.dark {
+  color-scheme: dark;
+  --color-ink: #0B0813;
+  --color-ink-soft: #130F20;
+  --color-ink-raised: #1B152B;
+  --color-paper: #F5F3EE;
+  --color-mist: #A8A6A0;
+  --color-hairline: rgba(245, 243, 238, 0.09);
+  --color-glass-bg: rgba(19, 15, 32, 0.72);
+  --color-glass-border: rgba(245, 243, 238, 0.09);
+  --card-bg: rgba(19, 15, 32, 0.72);
+  --card-border: rgba(245, 243, 238, 0.09);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
 @layer base {
-  html {
-    color-scheme: dark;
-  }
   body {
     font-family: "Manrope", system-ui, sans-serif;
-    background: #0a0c10;
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  html:not(.dark) body {
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 162, 39, 0.08), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(52, 211, 153, 0.05), transparent);
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(119, 49, 230, 0.05), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(157, 78, 221, 0.03), transparent);
     background-attachment: fixed;
   }
-  ::selection {
-    background: rgba(201, 162, 39, 0.35);
-    color: #f5f3ee;
+
+  html.dark body {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(119, 49, 230, 0.14), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(157, 78, 221, 0.08), transparent);
+    background-attachment: fixed;
   }
-  /* Visible keyboard focus, kept subtle but real */
+
+  ::selection {
+    background: rgba(119, 49, 230, 0.35);
+    color: #ffffff;
+  }
+
   :focus-visible {
-    outline: 2px solid #c9a227;
+    outline: 2px solid #7731e6;
     outline-offset: 2px;
     border-radius: 4px;
   }
 }
 
 @layer components {
-  /* Base frosted-glass surface used throughout */
   .glass {
-    background: rgba(255, 255, 255, 0.035);
+    background: var(--color-glass-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(245, 243, 238, 0.09);
+    border: 1px solid var(--color-glass-border);
   }
 
-  /* The signature element: a laminated "campus ID card" treatment,
-     used for the auth panel and product cards alike — ties the visual
-     language to the idea of a verified, trusted campus identity. */
   .id-card {
     position: relative;
     border-radius: 20px;
     overflow: hidden;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
   }
   .id-card::before {
-    /* top hairline "lamination edge" in gold */
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, transparent, #c9a227 20%, #e4c25a 50%, #c9a227 80%, transparent);
-    opacity: 0.85;
+    background: linear-gradient(90deg, transparent, #7731e6 20%, #c77dff 50%, #7731e6 80%, transparent);
+    opacity: 0.9;
   }
   .id-card::after {
-    /* faint diagonal holographic sheen, animated in on hover via .sheen-hover */
     content: "";
     position: absolute;
     inset: 0;
     background: linear-gradient(
       115deg,
       transparent 30%,
-      rgba(228, 194, 90, 0.08) 45%,
-      rgba(52, 211, 153, 0.06) 50%,
+      rgba(157, 78, 221, 0.10) 45%,
+      rgba(199, 125, 255, 0.06) 50%,
       transparent 65%
     );
     background-size: 250% 100%;
@@ -76,23 +116,89 @@
 
   .chip {
     @apply px-3.5 py-1.5 rounded-full text-sm font-medium border border-hairline text-mist transition-colors duration-200;
+    background: var(--color-ink-soft);
   }
   .chip[data-active="true"] {
-    @apply bg-gold/10 border-gold/40 text-gold-bright;
+    @apply bg-gold/15 border-gold/50 text-gold shadow-sm font-semibold;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gold text-ink font-semibold px-5 py-3 transition-all duration-200 hover:bg-gold-bright hover:shadow-goldGlow active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-5 py-3 transition-all duration-200 active:scale-[0.98];
+    background-color: #7731E6 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px 0 rgba(119, 49, 230, 0.35);
   }
+  .btn-primary:hover {
+    background-color: #8B3FFC !important;
+    box-shadow: 0 6px 20px 0 rgba(119, 49, 230, 0.45);
+  }
+
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-hairline text-paper font-medium px-5 py-3 transition-all duration-200 hover:bg-white/5 active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-hairline font-medium px-5 py-3 transition-all duration-200 active:scale-[0.98];
+    color: var(--color-paper);
+    background: var(--card-bg);
+  }
+  .btn-ghost:hover {
+    background: rgba(119, 49, 230, 0.06);
   }
 
   .field-label {
     @apply block text-xs font-semibold uppercase tracking-[0.14em] text-mist mb-2;
   }
   .field-input {
-    @apply w-full rounded-lg bg-black/25 border border-hairline px-4 py-3 text-paper placeholder:text-mist/60 outline-none transition-colors duration-150 focus:border-gold/60;
+    @apply w-full rounded-lg border border-hairline px-4 py-3 outline-none transition-colors duration-150 focus:border-gold/60;
+    background: var(--card-bg);
+    color: var(--color-paper);
+  }
+
+  /* ─── Logo-matched Purple Brand Utilities ─── */
+  .text-gold {
+    color: #7731E6 !important;
+  }
+  .text-gold-bright {
+    color: #9D4EDD !important;
+  }
+  .text-gold-dim {
+    color: #5A189A !important;
+  }
+  .bg-gold {
+    background-color: #7731E6 !important;
+  }
+  .bg-gold\/10 {
+    background-color: rgba(119, 49, 230, 0.1) !important;
+  }
+  .bg-gold\/15 {
+    background-color: rgba(119, 49, 230, 0.15) !important;
+  }
+  .bg-gold\/20 {
+    background-color: rgba(119, 49, 230, 0.2) !important;
+  }
+  .border-gold {
+    border-color: #7731E6 !important;
+  }
+  .border-gold\/20 {
+    border-color: rgba(119, 49, 230, 0.2) !important;
+  }
+  .border-gold\/25 {
+    border-color: rgba(119, 49, 230, 0.25) !important;
+  }
+  .border-gold\/30 {
+    border-color: rgba(119, 49, 230, 0.3) !important;
+  }
+  .border-gold\/40 {
+    border-color: rgba(119, 49, 230, 0.4) !important;
+  }
+  .border-gold\/50 {
+    border-color: rgba(119, 49, 230, 0.5) !important;
+  }
+  .hover\:bg-gold-bright:hover {
+    background-color: #9D4EDD !important;
+  }
+  .hover\:border-gold\/50:hover {
+    border-color: rgba(119, 49, 230, 0.5) !important;
+  }
+  .shadow-goldGlow {
+    box-shadow: 0 0 0 1px rgba(119, 49, 230, 0.35), 0 8px 24px rgba(119, 49, 230, 0.25) !important;
   }
 }
 

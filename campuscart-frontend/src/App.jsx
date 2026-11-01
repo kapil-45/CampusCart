@@ -9,6 +9,8 @@ import Sell from './pages/Sell'
 import Messages from './pages/Messages'
 import Profile from './pages/Profile'
 
+import { ThemeProvider } from './context/ThemeContext'
+
 /** Shows the landing page to guests; redirects logged-in users to the dashboard */
 function RootRoute() {
   const { user } = useAuth()
@@ -23,25 +25,27 @@ function RequireAuth({ children }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<RootRoute />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<RootRoute />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Dashboard — all behind RequireAuth */}
-          <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
-          <Route path="/listing/:id" element={<RequireAuth><ListingDetail /></RequireAuth>} />
-          <Route path="/listing/:id/edit" element={<RequireAuth><Sell /></RequireAuth>} />
-          <Route path="/sell" element={<RequireAuth><Sell /></RequireAuth>} />
-          <Route path="/sell/:id" element={<RequireAuth><Sell /></RequireAuth>} />
-          <Route path="/messages" element={<RequireAuth><Messages /></RequireAuth>} />
-          <Route path="/messages/:id" element={<RequireAuth><Messages /></RequireAuth>} />
-          <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+            {/* Dashboard — all behind RequireAuth */}
+            <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
+            <Route path="/listing/:id" element={<RequireAuth><ListingDetail /></RequireAuth>} />
+            <Route path="/listing/:id/edit" element={<RequireAuth><Sell /></RequireAuth>} />
+            <Route path="/sell" element={<RequireAuth><Sell /></RequireAuth>} />
+            <Route path="/sell/:id" element={<RequireAuth><Sell /></RequireAuth>} />
+            <Route path="/messages" element={<RequireAuth><Messages /></RequireAuth>} />
+            <Route path="/messages/:id" element={<RequireAuth><Messages /></RequireAuth>} />
+            <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

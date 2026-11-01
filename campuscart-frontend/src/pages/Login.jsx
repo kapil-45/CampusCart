@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import Wordmark from '../components/Wordmark'
 import FormField from '../components/FormField'
 import AmbientScene from '../components/AmbientScene'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function Login() {
   const { login } = useAuth()
@@ -30,7 +31,10 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-screen grid lg:grid-cols-2 relative bg-ink text-paper transition-colors duration-300">
+      <div className="absolute top-6 right-6 z-30">
+        <ThemeToggle />
+      </div>
       {/* left: form panel */}
       <div className="flex items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-md">

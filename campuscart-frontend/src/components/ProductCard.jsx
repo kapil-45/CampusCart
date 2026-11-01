@@ -47,23 +47,23 @@ export default function ProductCard({ product }) {
       className="id-card sheen-hover glass group flex flex-col transition-transform duration-300 hover:-translate-y-1"
     >
       {/* image / placeholder */}
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-ink-raised to-black/40 overflow-hidden">
+      <div className="relative aspect-[4/3] bg-slate-100 dark:bg-black/30 overflow-hidden">
         {hasImage ? (
           <img
             src={images[0]}
             alt={product.title}
             referrerPolicy="no-referrer"
             onError={() => setImageFailed(true)}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center">
-            <span className="font-display text-4xl text-hairline">CC</span>
+            <span className="font-display text-4xl text-slate-300 dark:text-hairline">CC</span>
           </div>
         )}
 
         {product.category && (
-          <span className="absolute top-3 left-3 chip !py-1 !px-2.5 !text-xs bg-ink/70 backdrop-blur-sm">
+          <span className="absolute top-3 left-3 chip !py-1 !px-2.5 !text-xs bg-white/90 dark:bg-ink/80 text-purple-700 dark:text-purple-300 shadow-sm border border-slate-200/60 dark:border-hairline backdrop-blur-sm">
             {product.category}
           </span>
         )}

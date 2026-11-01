@@ -274,7 +274,7 @@ export default function ListingDetail() {
                     title={inWishlist ? 'Remove from wishlist' : 'Save to wishlist'}
                     className="h-9 w-9 flex items-center justify-center rounded-full border border-hairline hover:border-gold/40 transition-colors disabled:opacity-40"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill={inWishlist ? '#C9A227' : 'none'} stroke={inWishlist ? '#C9A227' : '#A8A6A0'} strokeWidth="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill={inWishlist ? '#7731E6' : 'none'} stroke={inWishlist ? '#7731E6' : '#A8A6A0'} strokeWidth="2">
                       <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" />
                     </svg>
                   </button>
@@ -327,7 +327,7 @@ export default function ListingDetail() {
               </div>
 
               <div className="flex items-start gap-2.5 rounded-xl border border-gold/20 bg-gold/[0.04] px-4 py-3 mb-5">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C9A227" strokeWidth="2" className="mt-0.5 shrink-0">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7731E6" strokeWidth="2" className="mt-0.5 shrink-0">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
                 <p className="text-xs text-mist leading-relaxed">

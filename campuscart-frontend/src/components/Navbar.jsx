@@ -4,6 +4,8 @@ import Wordmark from './Wordmark'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
 
+import ThemeToggle from './ThemeToggle'
+
 export default function Navbar({ search, onSearchChange }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -25,7 +27,7 @@ export default function Navbar({ search, onSearchChange }) {
   }, [user])
 
   return (
-    <header className="sticky top-0 z-30 glass border-b border-hairline">
+    <header className="sticky top-0 z-30 glass border-b border-hairline transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center gap-6">
         <Link to="/home">
           <Wordmark />
@@ -46,11 +48,13 @@ export default function Navbar({ search, onSearchChange }) {
             value={search || ''}
             onChange={(e) => onSearchChange?.(e.target.value)}
             placeholder="Search for textbooks, calculators, bikes…"
-            className="w-full rounded-full bg-black/25 border border-hairline pl-10 pr-4 py-2.5 text-sm text-paper placeholder:text-mist/60 outline-none focus:border-gold/60 transition-colors"
+            className="field-input !rounded-full pl-10 pr-4 !py-2.5 text-sm"
           />
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
+
           {user ? (
             <>
               <Link

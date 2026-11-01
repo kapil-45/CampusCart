@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Wordmark from '../components/Wordmark'
+import ThemeToggle from '../components/ThemeToggle'
 
 /* ─── Floating particle field ─── */
 function ParticleField() {
@@ -41,7 +42,7 @@ function ParticleField() {
 
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(201,162,39,${p.alpha})`
+        ctx.fillStyle = `rgba(157,78,221,${p.alpha})`
         ctx.fill()
       })
 
@@ -54,7 +55,7 @@ function ParticleField() {
             ctx.beginPath()
             ctx.moveTo(particles[i].x, particles[i].y)
             ctx.lineTo(particles[j].x, particles[j].y)
-            ctx.strokeStyle = `rgba(201,162,39,${0.06 * (1 - dist / 100)})`
+            ctx.strokeStyle = `rgba(199,125,255,${0.08 * (1 - dist / 100)})`
             ctx.lineWidth = 0.6
             ctx.stroke()
           }
@@ -242,16 +243,25 @@ function TestimonialCard({ quote, author, college, avatar, delay = 0 }) {
   )
 }
 
-/* ─── Floating product preview card ─── */
-function FloatingCard({ title, price, category, top, left, animClass, delay }) {
+/* ─── Floating product preview card matching mockup ─── */
+function FloatingCard({ title, price, category, image, top, left, animClass, delay }) {
   return (
     <div
-      className={`absolute glass id-card px-4 py-3 min-w-[160px] shadow-glass pointer-events-none select-none ${animClass}`}
+      className={`absolute id-card px-4 py-3 min-w-[220px] pointer-events-none select-none transition-all duration-300 ${animClass}`}
       style={{ top, left, animationDelay: delay }}
     >
-      <p className="text-[10px] text-mist uppercase tracking-widest mb-1">{category}</p>
-      <p className="text-paper text-sm font-medium truncate">{title}</p>
-      <p className="text-gold-bright text-sm font-bold mt-1">₹{price}</p>
+      <div className="flex items-center gap-3.5">
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase tracking-wider mb-0.5">{category}</p>
+          <p className="text-paper text-sm font-semibold truncate">{title}</p>
+          <p className="text-gold font-bold text-sm mt-0.5">₹{price}</p>
+        </div>
+        {image && (
+          <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 shrink-0 flex items-center justify-center p-1">
+            <img src={image} alt={title} className="w-full h-full object-contain" />
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -269,22 +279,23 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-ink text-paper transition-colors duration-300">
 
       {/* ── Sticky Nav ── */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'glass border-b border-hairline shadow-glass' : 'bg-transparent'
+          scrolled ? 'glass border-b border-hairline shadow-sm' : 'bg-transparent'
         }`}
       >
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
           <Wordmark size="md" />
           <nav className="hidden md:flex items-center gap-6 text-sm text-mist">
-            <a href="#features" className="hover:text-paper transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-paper transition-colors">How It Works</a>
-            <a href="#testimonials" className="hover:text-paper transition-colors">Stories</a>
+            <a href="#features" className="hover:text-paper transition-colors font-medium">Features</a>
+            <a href="#how-it-works" className="hover:text-paper transition-colors font-medium">How It Works</a>
+            <a href="#testimonials" className="hover:text-paper transition-colors font-medium">Stories</a>
           </nav>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link to="/login" className="btn-ghost !px-4 !py-2 text-sm">Log In</Link>
             <Link to="/register" className="btn-primary !px-4 !py-2 text-sm">Join Free</Link>
           </div>
@@ -295,51 +306,57 @@ export default function LandingPage() {
           HERO
       ══════════════════════════════════════ */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        {/* background orbs */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-gold/10 blur-[140px] animate-drift" />
-          <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-emerald/8 blur-[120px] animate-driftSlow" />
-          <div className="absolute bottom-0 -left-24 w-[400px] h-[400px] rounded-full bg-gold/6 blur-[100px] animate-drift" />
+        {/* Background artwork: Light mode organic fluid curves & dashed orbits; Dark mode deep cosmic glow */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Light mode fluid blurs matching mockup */}
+          <div className="dark:hidden absolute -top-24 -left-20 w-[480px] h-[480px] rounded-full bg-purple-200/40 blur-[90px]" />
+          <div className="dark:hidden absolute top-1/4 -right-20 w-[520px] h-[520px] rounded-full bg-purple-200/45 blur-[100px]" />
+          <div className="dark:hidden absolute -bottom-24 left-1/3 w-[450px] h-[450px] rounded-full bg-indigo-100/60 blur-[90px]" />
+
+          {/* Dark mode background orbs */}
+          <div className="hidden dark:block absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-purple-900/20 blur-[140px] animate-drift" />
+          <div className="hidden dark:block absolute top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-indigo-900/15 blur-[120px] animate-driftSlow" />
+          <div className="hidden dark:block absolute bottom-0 -left-24 w-[400px] h-[400px] rounded-full bg-purple-950/25 blur-[100px] animate-drift" />
+
+          {/* Light mode decorative dashed orbit lines and node badges */}
+          <svg className="dark:hidden absolute inset-0 w-full h-full opacity-60" viewBox="0 0 1440 800" fill="none">
+            <path d="M 80 200 C 180 120, 320 180, 420 140 C 600 80, 840 220, 1020 160 C 1200 100, 1360 180, 1420 120" stroke="#A855F7" strokeWidth="1.2" strokeDasharray="4 6" opacity="0.45" />
+            <path d="M 40 450 C 180 520, 360 420, 520 480 C 720 560, 940 440, 1140 500 C 1280 540, 1380 480, 1440 520" stroke="#A855F7" strokeWidth="1.2" strokeDasharray="4 6" opacity="0.45" />
+            <circle cx="420" cy="140" r="3.5" fill="#8B5CF6" />
+            <circle cx="1020" cy="160" r="3.5" fill="#8B5CF6" />
+            <circle cx="520" cy="480" r="3.5" fill="#8B5CF6" />
+            <circle cx="1140" cy="500" r="3.5" fill="#8B5CF6" />
+          </svg>
         </div>
 
         <ParticleField />
 
-        {/* campus silhouettes */}
-        <svg className="absolute bottom-16 left-10 w-36 h-36 opacity-[0.05] text-paper pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1">
-          <path d="M10 30 Q50 15 90 30 L90 75 Q50 60 10 75 Z" /><path d="M50 18 L50 68" />
-        </svg>
-        <svg className="absolute top-32 right-12 w-24 h-24 opacity-[0.05] text-paper pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2">
-          <circle cx="50" cy="50" r="34" /><circle cx="50" cy="50" r="4" />
-          <path d="M50 16 L50 84 M16 50 L84 50 M27 27 L73 73 M27 73 L73 27" strokeWidth="0.5" />
-        </svg>
-
-        {/* floating product preview cards — hidden on mobile */}
+        {/* floating product preview cards matching mockup */}
         <div className="hidden xl:block">
-          <FloatingCard title="Engineering Textbooks" price="320" category="Books" top="22%" left="4%" animClass="animate-drift" delay="0s" />
-          <FloatingCard title="Scientific Calculator" price="650" category="Electronics" top="58%" left="3%" animClass="animate-driftSlow" delay="1.5s" />
-          <FloatingCard title="Mountain Bicycle" price="4500" category="Bicycles" top="28%" left="73%" animClass="animate-driftSlow" delay="0.8s" />
-          <FloatingCard title="Study Desk Lamp" price="280" category="Furniture" top="62%" left="74%" animClass="animate-drift" delay="2s" />
+          <FloatingCard title="Engineering Textbooks" price="320" category="Books" image="/thumb-books.png" top="20%" left="4%" animClass="animate-drift" delay="0s" />
+          <FloatingCard title="Scientific Calculator" price="650" category="Electronics" image="/thumb-calc.png" top="56%" left="3%" animClass="animate-driftSlow" delay="1.5s" />
+          <FloatingCard title="Mountain Bicycle" price="4500" category="Bicycles" image="/thumb-bike.png" top="24%" left="72%" animClass="animate-driftSlow" delay="0.8s" />
+          <FloatingCard title="Study Desk Lamp" price="280" category="Furniture" image="/thumb-lamp.png" top="60%" left="73%" animClass="animate-drift" delay="2s" />
         </div>
 
         {/* hero content */}
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           {/* live badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gold/30 text-gold-bright text-xs font-semibold uppercase tracking-widest mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-gold-bright animate-ping inline-block" />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold uppercase tracking-wider mb-8 bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800/40 text-purple-700 dark:text-purple-300 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-ping inline-block" />
             Campus Marketplace — Now Live
           </div>
 
           <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl text-paper leading-[1.08] mb-6">
             Buy &amp; Sell{' '}
-            <span className="relative inline-block">
-              <span className="text-gold-bright">Within Campus.</span>
-              <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent opacity-60 rounded-full" />
+            <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-600 dark:from-purple-400 dark:to-indigo-300">
+              Within Campus.
             </span>
             <br />
-            <span className="text-paper/60">Zero Hassle.</span>
+            <span className="text-paper/70">Zero Hassle.</span>
           </h1>
 
-          <p className="text-lg text-mist max-w-xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg text-mist max-w-xl mx-auto mb-10 leading-relaxed font-normal">
             CampusCart connects students to trade textbooks, electronics, bicycles
             and more — all within your verified campus community.
           </p>
@@ -348,7 +365,7 @@ export default function LandingPage() {
             <Link
               to="/register"
               id="hero-register-btn"
-              className="btn-primary !px-8 !py-4 text-base shadow-goldGlow w-full sm:w-auto"
+              className="btn-primary !px-8 !py-4 text-base shadow-lg shadow-purple-600/30 w-full sm:w-auto"
             >
               Start for Free
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -365,9 +382,12 @@ export default function LandingPage() {
           </div>
 
           {/* trust bar */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-mist/60">
-            {['✓ Verified campus emails only', '✓ In-app messaging', '✓ 100% free to list'].map((t) => (
-              <span key={t}>{t}</span>
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-mist">
+            {['Verified campus emails only', 'In-app messaging', '100% free to list'].map((t) => (
+              <span key={t} className="flex items-center gap-1.5">
+                <span className="text-purple-600 dark:text-purple-400 font-bold">✓</span>
+                {t}
+              </span>
             ))}
           </div>
         </div>
@@ -416,7 +436,7 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════
           HOW IT WORKS
       ══════════════════════════════════════ */}
-      <section id="how-it-works" className="py-24 px-6" style={{ background: 'rgba(18,21,28,0.4)' }}>
+      <section id="how-it-works" className="py-24 px-6 bg-slate-50/70 dark:bg-black/20 border-y border-hairline">
         <div className="mx-auto max-w-7xl grid lg:grid-cols-2 gap-16 items-center">
           {/* steps */}
           <div>
@@ -444,7 +464,7 @@ export default function LandingPage() {
                   </div>
                   <span className="ml-auto px-2.5 py-1 rounded-full bg-emerald/10 border border-emerald/30 text-emerald text-[11px] font-semibold">Active</span>
                 </div>
-                <div className="w-full h-36 rounded-xl bg-gradient-to-br from-gold/10 to-emerald/10 border border-hairline mb-4 flex items-center justify-center">
+                <div className="w-full h-36 rounded-xl bg-gradient-to-br from-purple-600/15 to-indigo-600/10 border border-hairline mb-4 flex items-center justify-center">
                   <svg className="w-16 h-16 opacity-20 text-paper" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <path d="M10 30 Q50 15 90 30 L90 75 Q50 60 10 75 Z" /><path d="M50 18 L50 68" />
                   </svg>
@@ -496,7 +516,7 @@ export default function LandingPage() {
               <span
                 key={`${rep}-${cat}`}
                 className="chip inline-flex items-center gap-2 text-sm flex-shrink-0"
-                style={{ borderColor: 'rgba(201,162,39,0.2)', color: 'rgba(245,243,238,0.55)' }}
+                style={{ borderColor: 'rgba(157,78,221,0.25)' }}
               >
                 {cat}
               </span>
@@ -537,9 +557,12 @@ export default function LandingPage() {
       <footer className="border-t border-hairline glass py-10 px-6">
         <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <Wordmark />
-          <p className="text-mist text-xs text-center sm:text-right">
-            © {new Date().getFullYear()} CampusCart · Made with ❤️ for students, by students.
-          </p>
+          <div className="flex items-center gap-4">
+            <ThemeToggle size="sm" />
+            <p className="text-mist text-xs text-center sm:text-right">
+              © {new Date().getFullYear()} CampusCart · Made with ❤️ for students, by students.
+            </p>
+          </div>
         </div>
       </footer>
 
